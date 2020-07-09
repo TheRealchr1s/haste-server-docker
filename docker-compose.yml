@@ -1,0 +1,33 @@
+version: '3'
+
+networks:
+    haste:
+        external: false
+
+volumes:
+    haste-postgres:
+
+services:
+    hastebin:
+        build: .
+        restart: unless-stopped
+        environment:
+            - NODE_ENV=production
+        networks:
+            - haste
+        ports:
+            - 7777:7777
+        depends_on:
+            - pg
+    pg:
+        image: postgres
+        restart: unless-stopped
+        environment:
+            - POSTGRES_USER=haste
+            - POSTGRES_PASSWORD=secret
+            - POSTGRES_DB=haste
+        networks:
+            - haste
+        volumes:
+            - haste-postgres:/var/lib/postgresql/data
+            - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
